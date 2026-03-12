@@ -36,10 +36,10 @@ public class TankDrive extends SubsystemBase {
   /** Creates a new TankDrive. */
   public TankDrive() {
     // This is creating and configuring the motors
-    frontLeft = new SparkMax(FRONT_LEFT_MOTOR, MotorType.kBrushed); 
-    frontRight = new SparkMax(FRONT_RIGHT_MOTOR, MotorType.kBrushed);
-    backLeft = new SparkMax(BACK_LEFT_MOTOR, MotorType.kBrushed);
-    backRight = new SparkMax(BACK_RIGHT_MOTOR, MotorType.kBrushed);
+    frontLeft = new SparkMax(FRONT_LEFT_MOTOR, MotorType.kBrushless); 
+    frontRight = new SparkMax(FRONT_RIGHT_MOTOR, MotorType.kBrushless);
+    backLeft = new SparkMax(BACK_LEFT_MOTOR, MotorType.kBrushless);
+    backRight = new SparkMax(BACK_RIGHT_MOTOR, MotorType.kBrushless);
     
     frontLeftConfig = new SparkMaxConfig();
     frontRightConfig = new SparkMaxConfig();
