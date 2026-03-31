@@ -84,7 +84,7 @@ public class RobotContainer {
     camera.setResolution(320, 420);
     camera.setFPS(30);
     
-    spinIntake = Commands.runEnd(() -> {intakeSubsystem.spinIntake(0.6, 0.8);}, ()-> {intakeSubsystem.spinIntake(0,0);}, intakeSubsystem);
+    spinIntake = Commands.runEnd(() -> {intakeSubsystem.spinIntake(0.5, 0.8);}, ()-> {intakeSubsystem.spinIntake(0,0);}, intakeSubsystem);
     outake = Commands.runEnd(() -> {intakeSubsystem.spinIntake(-0.6, -0.8);}, () -> {intakeSubsystem.spinIntake(0,0);}, intakeSubsystem);
     shootCommand = Commands.runEnd(() -> intakeSubsystem.PIDShoot(3000), () -> intakeSubsystem.stop(),  intakeSubsystem);
     unstuckinator = Commands.runEnd(() -> intakeSubsystem.PIDShoot(500), () -> intakeSubsystem.stop(), intakeSubsystem);

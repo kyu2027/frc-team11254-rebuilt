@@ -92,7 +92,7 @@ public class Intake extends SubsystemBase {
   public void spinIntake(double spinSpeed, double feederSpeed){
     shooter.set(spinSpeed);
     intake.set(spinSpeed);
-    feeder.set(-feederSpeed);
+    feeder.set(feederSpeed);
   }
 
   /** spins the intake with joystick */
