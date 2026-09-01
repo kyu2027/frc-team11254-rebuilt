@@ -23,7 +23,7 @@ public final class Autos {
 
   public static Command centerAuto(TankDrive drive, Intake shoot){
     return Commands.sequence(
-      drive.timedDrive(-0.2, 1.35),
+      drive.timedDrive(-0.2, 0.75),
       new ShootWithDelay(shoot)
     );
   }
@@ -31,16 +31,21 @@ public final class Autos {
   public static Command climbAuto(TankDrive drive, climber climbUp, climber climbDown){
     return Commands.sequence(
       new ClimbUpForAuto(climbUp).withTimeout(2),
-      drive.timedDrive(-.2, 3.2).withTimeout(3.2),
+      //drive.timedDrive(-.2, 3.2).withTimeout(3.2),
+      Commands.runEnd(() -> drive.driveWithRotateLock(-.3, 9.9), () -> drive.drive(0), drive).withTimeout(12),
       new ClimbDownForAuto(climbDown).withTimeout(2)
     );
   }
 
   public static Command sideAuto(TankDrive drive, Intake shoot){
     return Commands.sequence(
-      drive.timedDrive(-0.15, 1.5), //WAS 0.4
+      drive.timedDrive(-0.15, .4), //WAS 0.4
       new ShootWithDelay(shoot)
     );
+  }
+
+  public static Command driveSysID(TankDrive drive){
+    return drive.runSysID();
   }
 
   private Autos() {

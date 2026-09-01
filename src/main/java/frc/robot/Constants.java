@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
+import edu.wpi.first.math.util.Units;
 
 public final class Constants {
   
@@ -12,6 +13,9 @@ public final class Constants {
     public static final int FRONT_RIGHT_MOTOR = 2;
     public static final int BACK_LEFT_MOTOR = 3;
     public static final int BACK_RIGHT_MOTOR = 4;
+    public static final double WHEEL_DIAMETER = 5.5;
+    public static final double LEFT_WHEEL_CONVERT = (Units.inchesToMeters(WHEEL_DIAMETER) * Math.PI) / 60;
+    public static final double RIGHT_WHEEL_CONVERT = (Units.inchesToMeters(WHEEL_DIAMETER) * Math.PI) / 60;
   }
   
   public static class OperatorConstants {

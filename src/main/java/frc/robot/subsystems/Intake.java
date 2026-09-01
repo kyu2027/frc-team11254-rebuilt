@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import com.revrobotics.PersistMode;
@@ -21,17 +20,14 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.robot.Constants.intakeConstants;
 import frc.robot.Constants.shooterConstants;
-import frc.robot.Constants.intakeConstants.*;
 
 import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.Constants.shooterConstants.*;
-
 
 public class Intake extends SubsystemBase {
   private SparkMax shooter;
@@ -41,6 +37,7 @@ public class Intake extends SubsystemBase {
   private SparkFlex intake;
   private SparkClosedLoopController sparkControl;
   private RelativeEncoder encoder;
+  private RelativeEncoder shooterEncoder;
   private SysIdRoutine shooterSysID;
   private SparkFlexConfig intakeConfig;
 
@@ -56,6 +53,7 @@ public class Intake extends SubsystemBase {
     
     sparkControl = intake.getClosedLoopController();
     encoder = intake.getEncoder();
+    shooterEncoder = shooter.getEncoder();
     
     feederConfig
       .idleMode(IdleMode.kBrake)
@@ -66,9 +64,12 @@ public class Intake extends SubsystemBase {
     shooterConfig
       .idleMode(IdleMode.kBrake)
       .smartCurrentLimit(60)
-      .closedLoop.positionWrappingEnabled(true)
-      .pid(.0005, 0, 0);
-    
+      .closedLoop.positionWrappingEnabled(true);
+      // .pid(0, 0, 0);
+
+    shooterConfig.closedLoop.feedForward
+      .sva(0.16714, 0.00034167, 0);
+
     shooterConfig.encoder.velocityConversionFactor(VELOCITY_CONVERT);
     
 //config
@@ -78,9 +79,9 @@ public class Intake extends SubsystemBase {
 
     shooterSysID = new SysIdRoutine(
       new SysIdRoutine.Config(
-        Volts.of(1).per(Second),
-        Volts.of(3),
-        Seconds.of(10)
+        Volts.of(2).per(Second),
+        Volts.of(8),
+        Seconds.of(30)
       ), 
       new SysIdRoutine.Mechanism(
         (volts) -> shooter.setVoltage(volts.in(Volts)), 
@@ -96,12 +97,12 @@ public class Intake extends SubsystemBase {
   }
 
   /** spins the intake with joystick */
-  public Command intakeWithJoystick(double speed){
-    return Commands.run(() ->  {shooter.set(speed);}, this);
-  }
+  // public Command intakeWithJoystick(double speed){
+  //   return Commands.run(() ->  {shooter.set(speed);}, this);
+  // }
 
-  /**WE NEED TO PUT A STOP TO THIS.(/°@^)
- * creates the stop command to prevent continuou running
+  /**
+ * creates the stop command to prevent continuous running. This will becalled upon during autos to end shoot commandss to prevent constantoutput
  */
   public void stop(){
     intake.stopMotor();
@@ -112,9 +113,9 @@ public class Intake extends SubsystemBase {
   /**This command is largely empty
    * placed to prevent an ERROR (/°W^)
    */
-  public void spinShoot(){
-    shooter.set(.4);
-  }
+  // public void spinShoot(){
+  //   shooter.set(.4);
+  // }
 
   /**will be pulled from when firing
    * 
@@ -125,24 +126,26 @@ public class Intake extends SubsystemBase {
     ///sparkControl.setSetpoint(fireSpeed, ControlType.kVelocity);
   }
 
-  public void intakeMotorShooter(){
-    feeder.set(.4);
-  }
+  // public void intakeMotorShooter(){
+  //   feeder.set(.4);
+  // }
 
-  public void spinShooter() {
+  public void spinShooter() {//both spinshooter and spinfeeder are relavent to shoot withdelay as they isolate the uses allowing for the shooter to be spun without allowing for the feeder to cause clogging.
     shooter.set(0.8);
   }
-
   public void spinFeeder() {
     feeder.set(-0.6);
   }
 
   public Command runSysID(){
     return Commands.sequence(
-      shooterSysID.quasistatic(Direction.kForward).withTimeout(2),
-      shooterSysID.quasistatic(Direction.kReverse).withTimeout(2),
-      shooterSysID.dynamic(Direction.kForward).withTimeout(2),
-      shooterSysID.dynamic(Direction.kReverse).withTimeout(2));
+      shooterSysID.quasistatic(Direction.kForward).withTimeout(5),
+      new WaitCommand(2),
+      shooterSysID.quasistatic(Direction.kReverse).withTimeout(5),
+      new WaitCommand(2),
+      shooterSysID.dynamic(Direction.kForward).withTimeout(5),
+      new WaitCommand(2),
+      shooterSysID.dynamic(Direction.kReverse).withTimeout(5));
   }
 /**return shooter velocity*/
   public double getVelocity(){
@@ -166,8 +169,11 @@ public class Intake extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 /**elastic stuffs*/
-  public void intitSendable(SendableBuilder builder){
+  public void initSendable(SendableBuilder builder){
     super.initSendable(builder);
-    builder.addDoubleProperty("shooter velocity", () -> encoder.getVelocity(), null);
+    builder.addDoubleProperty("shooter velocity", () -> shooterEncoder.getVelocity(), null);
+    builder.addDoubleProperty("Shooter Voltage", () -> getVoltage(), null);
+    builder.addDoubleProperty("Shooter Encoder Position", () -> shooterEncoder.getPosition(), null);
+
   }
 }

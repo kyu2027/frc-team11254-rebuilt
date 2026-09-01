@@ -37,7 +37,7 @@ public class TimedDrive extends Command {
   @Override
   public void execute() {
     //Drives for a certain amount of time
-    drive.drive(0.2, 0);
+    drive.drive(0.2);
   }
 
   // Called once the command ends or is interrupted.

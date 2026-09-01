@@ -9,6 +9,7 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.StadiaController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -18,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Intake;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-
 
 import com.revrobotics.spark.SparkMax;
 import frc.robot.subsystems.TankDrive;
@@ -58,6 +58,13 @@ public class RobotContainer {
   private JoystickButton unstuckButton;
   private JoystickButton climbupButton;
   private JoystickButton climbdownButton;
+  private JoystickButton rotateToAngleButton;
+  private JoystickButton driverIntakeButton;
+  private JoystickButton driverOutakeButton;
+  private JoystickButton driverClimbupButton;
+  private JoystickButton driverClimbdownButton;
+  private JoystickButton driverShootButton;
+  private JoystickButton checkbutton;
 
   private Command driveWithJoystick;
   private Command spinIntake;
@@ -87,8 +94,7 @@ public class RobotContainer {
     spinIntake = Commands.runEnd(() -> {intakeSubsystem.spinIntake(0.5, 0.8);}, ()-> {intakeSubsystem.spinIntake(0,0);}, intakeSubsystem);
     outake = Commands.runEnd(() -> {intakeSubsystem.spinIntake(-0.6, -0.8);}, () -> {intakeSubsystem.spinIntake(0,0);}, intakeSubsystem);
     shootCommand = Commands.runEnd(() -> intakeSubsystem.PIDShoot(3000), () -> intakeSubsystem.stop(),  intakeSubsystem);
-    unstuckinator = Commands.runEnd(() -> intakeSubsystem.PIDShoot(500), () -> intakeSubsystem.stop(), intakeSubsystem);
-    driveWithJoystick = Commands.run(() -> drive.joystickDrive(driver), drive);
+    driveWithJoystick = Commands.run(() -> drive.squareJoystickDrive(driver), drive);
     climbUp = Commands.run(() -> climbSubsystem.climbup(), climbSubsystem);
     Climbdown = Commands.run(() -> climbSubsystem.climbdown(), climbSubsystem);
 
@@ -97,9 +103,11 @@ public class RobotContainer {
     autoChooser.addOption("Center Auto", Autos.centerAuto(drive, intakeSubsystem));
     autoChooser.addOption("Side Auto", Autos.sideAuto(drive,intakeSubsystem));
     autoChooser.addOption("Climb Auto", Autos.climbAuto(drive, climbSubsystem, climbSubsystem));
+    autoChooser.addOption("Drive SysID", Autos.driveSysID(drive));
     SmartDashboard.putData(autoChooser);
     SmartDashboard.putData(climbSubsystem);
     SmartDashboard.putData(intakeSubsystem);
+    SmartDashboard.putData(drive);
 
     driver = new XboxController(0);
     operator = new XboxController(1);
@@ -110,8 +118,13 @@ public class RobotContainer {
     shootButton = new JoystickButton(operator, XboxController.Button.kRightBumper.value);
     climbupButton = new JoystickButton(operator, XboxController.Button.kX.value);
     climbdownButton = new JoystickButton(operator, XboxController.Button.kY.value);
-
-    SmartDashboard.putData(drive);
+    driverIntakeButton = new JoystickButton(driver, XboxController.Button.kA.value);
+    driverOutakeButton = new JoystickButton(driver, XboxController.Button.kB.value);
+    driverShootButton = new JoystickButton(driver, XboxController.Button.kRightBumper.value);
+    driverClimbupButton = new JoystickButton(driver, XboxController.Button.kX.value);
+    driverClimbdownButton = new JoystickButton(driver, XboxController.Button.kY.value);
+    checkbutton = new JoystickButton(driver, XboxController.Button.kLeftBumper.value);
+    //rotateToAngleButton = new JoystickButton(driver, XboxController.Button.kRightBumper.value);
     
     // Configure the trigger bindings
     drive.setDefaultCommand(driveWithJoystick);
@@ -138,6 +151,30 @@ public class RobotContainer {
     shootButton.whileTrue(shootCommand); //right bumper
     climbupButton.onTrue(climbUp);
     climbdownButton.onTrue(Climbdown);
+    driverIntakeButton.and(checkbutton).whileTrue(spinIntake);
+    driverOutakeButton.and(checkbutton).whileTrue(outake);
+    driverShootButton.and(checkbutton).whileTrue(shootCommand);
+    driverClimbupButton.and(checkbutton).onTrue(climbUp);
+    driverClimbdownButton.and(checkbutton).onTrue(Climbdown);
+
+
+    //rotateToAngleButton.onTrue(Commands.run(() -> drive.driveWithRotateLock(0, 180)));
+
+    // while(driver.getAButtonPressed() && driver.getLeftBumperButtonPressed()) {
+    //   Commands.runEnd(() -> {intakeSubsystem.spinIntake(0.5, 0.8);}, ()-> {intakeSubsystem.spinIntake(0,0);}, intakeSubsystem);
+    // }
+    // while(driver.getBButtonPressed() && driver.getLeftBumperButtonPressed()){
+    //   Commands.runEnd(() -> {intakeSubsystem.spinIntake(-0.6, -0.8);}, () -> {intakeSubsystem.spinIntake(0,0);}, intakeSubsystem);
+    // }
+    // while(driver.getXButtonPressed() && driver.getLeftBumperButtonPressed()){
+    //   Commands.run(() -> climbSubsystem.climbup(), climbSubsystem);
+    // }
+    // while(driver.getYButtonPressed() && driver.getLeftBumperPressed()){
+    //   Commands.run(()-> climbSubsystem.climbdown(), climbSubsystem);
+    // }
+    // while(driver.getRightBumperButtonPressed() && driver.getLeftBumperButtonPressed()){
+    //   Commands.runEnd(() -> intakeSubsystem.PIDShoot(3000), () -> intakeSubsystem.stop(),  intakeSubsystem);
+    // }
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.

@@ -6,8 +6,6 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.Command;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
@@ -26,7 +24,6 @@ public class climber extends SubsystemBase {
   private SparkMax climbMotorLeft;
   private SparkMaxConfig climbMotorRightConfig;
   private SparkMaxConfig climbMotorLeftConfig;
-  private SparkClosedLoopController sparkControl;
   private RelativeEncoder rightClimbEncoder;
   private RelativeEncoder leftClimbEncoder;
   private SparkClosedLoopController climbPID;
@@ -50,9 +47,11 @@ public class climber extends SubsystemBase {
     climbMotorRightConfig
       .idleMode(IdleMode.kBrake)
       .smartCurrentLimit(60);
-    climbMotorRightConfig.closedLoop.pid(0.15,0,0.01).outputRange(-1, 1).allowedClosedLoopError(.1, ClosedLoopSlot.kSlot0);//range for output still needs to be found
+    climbMotorRightConfig.closedLoop
+      .pid(0.15,0,0.01)
+      .outputRange(-1, 1)
+      .allowedClosedLoopError(.1, ClosedLoopSlot.kSlot0);//range for output still needs to be found
     climbMotorRightConfig.encoder.positionConversionFactor(CLIMBERPOS);
-
     climbMotorLeftConfig.encoder.positionConversionFactor(CLIMBERPOS);
 
     climbMotorRight.configure(climbMotorRightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -64,9 +63,9 @@ public class climber extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
   }
-  public void climbPosition(double rightposition){
-    sparkControl.setSetpoint(rightposition, ControlType.kPosition);
-  }
+  // public void climbPosition(double rightposition){
+  //   sparkControl.setSetpoint(rightposition, ControlType.kPosition);
+  // }
   public double getRightClimbPosition(){
     return rightClimbEncoder.getPosition();
   }
@@ -106,4 +105,4 @@ public class climber extends SubsystemBase {
     builder.addBooleanProperty("At Top", () -> atPosition(CLIMBERUP), null);
     builder.addBooleanProperty("At Bottom", () -> atPosition(CLIMBDOWN), null);
   }
-}//redo code based on elavator removing the funlle code
+}
